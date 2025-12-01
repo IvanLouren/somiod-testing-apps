@@ -1,0 +1,30 @@
+﻿# Build outputs
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+*.exe
+*.dll
+*.pdb
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+.vs/
+
+# NuGet Packages
+**/packages/*
+!**/packages/build/
+
+# Runtime generated notifications
+**/Notifications/**/*.xml
+
+# Keep schemas
+!**/Schemas/*.xsd
+
+# Keep documentation
+!README.md
+!*.md
