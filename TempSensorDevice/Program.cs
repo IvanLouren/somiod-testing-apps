@@ -94,12 +94,34 @@ namespace TempSensorDevice
                 Random rand = new Random();
                 while (true)
                 {
-                    // Simulate temperature reading every 10 seconds
-                    double temp = 18.0 + (rand.NextDouble() * 6.0); // 18-24°C
-                    
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Current temperature: {temp:F1}°C");
+                    try
+                    {
+                        // 1. Simular temperatura (18-24°C)
+                        double temp = 18.0 + (rand.NextDouble() * 6.0);
 
-                    Thread.Sleep(10000); // 10 seconds
+                        // 2. Criar o XML do conteúdo
+                        string contentXml = $"<temp>{temp:F1}</temp>";
+
+                        // 3. ENVIAR PARA O MIDDLEWARE (Faltava isto!)
+                        // Nome do recurso único para cada leitura (ex: reading-123456)
+                        string readingName = $"reading-{DateTime.Now.Ticks}";
+
+                        somiodClient.CreateContentInstance(
+                            DEVICE_APP_NAME,
+                            CONTAINER_NAME,
+                            readingName,
+                            "application/xml",
+                            contentXml
+                        );
+
+                        Console.WriteLine($"[SENT] {readingName}: {temp:F1}°C");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[ERROR SENDING]: {ex.Message}");
+                    }
+
+                    Thread.Sleep(10000); // 10 segundos
                 }
             });
             simulationThread.IsBackground = true;
