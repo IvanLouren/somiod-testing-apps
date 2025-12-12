@@ -100,7 +100,7 @@ namespace TempSensorDevice
                         double temp = 18.0 + (rand.NextDouble() * 6.0);
 
                         // 2. Criar o XML do conteúdo
-                        string contentXml = $"<temp>{temp:F1}</temp>";
+                        string contentXml = $"<temp>{temp.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}</temp>";
 
                         // 3. ENVIAR PARA O MIDDLEWARE (Faltava isto!)
                         // Nome do recurso único para cada leitura (ex: reading-123456)
@@ -139,7 +139,7 @@ namespace TempSensorDevice
             Console.WriteLine("========================================");
             Console.WriteLine();
 
-            // Serialize to XML with validation
+            // Serialize to XML with validation (Mantido do teu código original)
             try
             {
                 XmlNotificationSerializer.SerializeAndValidate(payload, DEVICE_APP_NAME);
@@ -150,7 +150,24 @@ namespace TempSensorDevice
                 Console.WriteLine($"✗ XML serialization failed: {ex.Message}");
             }
 
-            // TODO: Parse notification and take action (e.g., trigger alarm)
+            // --- NOVA LÓGICA: Detetar comando da Ventoinha ---
+            // Verifica se a notificação se refere a um comando (nome começa por 'cmd-')
+            // ou se o conteúdo tem a instrução explicita
+            if (payload.Contains("cmd-") || payload.Contains("FAN_ON") || payload.Contains("Ligar Ventoinha"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("\n**********************************");
+                Console.WriteLine("* COMANDO RECEBIDO: LIGAR      *");
+                Console.WriteLine("* VENTOINHA LIGADA (VRRRRR!)   *");
+                Console.WriteLine("**********************************\n");
+                Console.ResetColor();
+            }
+            else if (payload.Contains("FAN_OFF") || payload.Contains("Desligar Ventoinha"))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\n-> COMANDO: Ventoinha Desligada.\n");
+                Console.ResetColor();
+            }
         }
 
         static void CleanupDevice()

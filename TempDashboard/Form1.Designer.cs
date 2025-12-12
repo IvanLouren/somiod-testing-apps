@@ -42,15 +42,14 @@
             this.lblTemp.Size = new System.Drawing.Size(101, 46);
             this.lblTemp.TabIndex = 0;
             this.lblTemp.Text = "-- ºC";
-            
             // 
             // lstLog
             // 
             this.lstLog.FormattingEnabled = true;
             this.lstLog.ItemHeight = 16;
-            this.lstLog.Location = new System.Drawing.Point(101, 70);
+            this.lstLog.Location = new System.Drawing.Point(12, 70);
             this.lstLog.Name = "lstLog";
-            this.lstLog.Size = new System.Drawing.Size(222, 244);
+            this.lstLog.Size = new System.Drawing.Size(346, 244);
             this.lstLog.TabIndex = 1;
             // 
             // btnSwitch
@@ -74,6 +73,7 @@
             this.Controls.Add(this.lblTemp);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

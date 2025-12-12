@@ -22,36 +22,14 @@ namespace TempDashboard
         public Form1()
         {
             InitializeComponent();
+
+            // 1. Forçar a ligação do evento Load manualmente
+            this.Load += Form1_Load;
+
+            // 2. Teste de vida (vai abrir uma janela quando iniciares)
+            MessageBox.Show("A App B arrancou! Se vês isto, o código está vivo.");
+
             client = new SomiodClient(middlewareUrl);
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            try
-            {
-                // 1. Criar a Aplicação Dashboard no Middleware
-                client.CreateApplication(myAppName);
-                Log("Aplicação Dashboard registada com sucesso.");
-
-                // 2. Criar Subscrição para ouvir a App A
-                // O endpoint diz ao MQTT para onde enviar. O 'evt: 1' é para criação de dados.
-                string subEndpoint = $"mqtt://{mqttBroker}:1883";
-                client.CreateSubscription(sensorAppName, sensorContainer, "sub-dash", 1, subEndpoint);
-                Log($"Subscrição criada no container '{sensorContainer}'.");
-
-                // 3. Iniciar o Listener MQTT
-                listener = new NotificationListener(mqttBroker);
-                listener.OnNotificationReceived += OnMessageReceived;
-
-                // Subscreve ao tópico onde o Middleware publica notificações
-                // Formato habitual: api/somiod/APP/CONTAINER
-                listener.Start($"api/somiod/{sensorAppName}/{sensorContainer}");
-                Log("À escuta de notificações MQTT...");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro de conexão: {ex.Message}. Verifica se o Middleware está a correr.");
-            }
         }
 
         private void OnMessageReceived(string topic, string payload)
@@ -115,7 +93,11 @@ namespace TempDashboard
 
         private void Log(string msg)
         {
-            lstLog.Items.Insert(0, $"[{DateTime.Now:HH:mm:ss}] {msg}");
+            if (lstLog != null) // Proteção extra
+            {
+                string texto = $"[{DateTime.Now:HH:mm:ss}] {msg}";
+                lstLog.Items.Insert(0, texto);
+            }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -126,6 +108,38 @@ namespace TempDashboard
         private void btnSwitch_Click(object sender, EventArgs e)
         {
             SendCommand("MANUAL_TOGGLE");
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            // Mensagem de teste para teres a certeza que entrou aqui
+            MessageBox.Show("A iniciar ligação...");
+
+            try
+            {
+                // 1. Criar a Aplicação Dashboard no Middleware
+                client.CreateApplication(myAppName);
+                Log("Aplicação Dashboard registada com sucesso.");
+
+                // 2. Criar Subscrição para ouvir a App A
+                // O 'evt: 1' significa que queremos saber quando dados são criados
+                string subEndpoint = $"mqtt://{mqttBroker}:1883";
+                client.CreateSubscription(sensorAppName, sensorContainer, "sub-dash", 1, subEndpoint);
+                Log($"Subscrição criada no container '{sensorContainer}'.");
+
+                // 3. Iniciar o Listener MQTT para receber as mensagens
+                listener = new NotificationListener(mqttBroker);
+                listener.OnNotificationReceived += OnMessageReceived;
+
+                // Subscreve ao tópico: api/somiod/NOME_DA_APP_A/NOME_DO_CONTAINER
+                listener.Start($"api/somiod/{sensorAppName}/{sensorContainer}");
+                Log("À escuta de notificações MQTT...");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"ERRO FATAL: {ex.Message}\n\nVerifica se o Middleware está a correr!");
+            }
+
         }
     }
 }
